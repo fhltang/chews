@@ -7,6 +7,8 @@ Build the tools to make it possible to run a part-time workstation cheaper in th
 Assumptions: the workstation in the cloud
    - is only running about 48h per week
    - has directly attached storage comparable in capacity to a desktop PC.
+
+Conclusion: Infeasible with Google Compute Platform pricing as of 2017-08-28.  See [Feasibility Analysis](#feasibility-analysis) below.
    
 ## Background
 
@@ -71,3 +73,80 @@ For this specific use case, we can simplify the solution by making some assumpti
    - the file system is intended to be mounted by one VM at a time
    - the file system can completely control the layout of data in blob storage.
 This means that the solution does not need to worry about cache coherence.
+
+## Feasibility analysis
+
+We consider the following workstation configuration:
+   - 4 cores
+   - 16GB ram
+   - 256 SSD system disk
+   - 2000GB HDD for dataset
+and the following usage parameters
+   - 1000GB dataset
+   - 64GB used on system disk
+   - 16h of workstation usage.
+
+As of 2017-08-28, the Google Compute Platform charges the following:
+   - $0.19 per hour for n1-standard-4 VM (4 cores, 16GB ram)
+   - $0.04 per core-hour for Windows Server licence
+   - $0.17 per GB-month for SSD-backed block devices
+   - $0.04 per GB-month for HDD-backed block devices
+   - $0.026 per GB-month for block device snapshots
+   - $0.02 per GB-month for Regional blob storage (zero transfer fee)
+   - $0.01 per GB-month for Nearline blob storage
+   - $0.01 per GB for Nearline retrieval
+
+For simplicity, we ignore costs for ops on GCS blobs.
+
+
+### Desktop PC
+
+Assuming depreciation over 4 years, a workstation purchase cost of $1550 and GCS Nearline for off-site back up, we have annual amortised costs of
+   - $387.50 for desktop depreciation
+   - $120 for off-site back up on Nearline GCS
+   - Total: $507.50
+
+
+### Snapshot-based virtual workstation
+
+Instead of a enthusiast spec desktop PC we assume a Chromebox is used instead.  Assuming a purchase cost of $160 for the Chromebox and depreciation over 4 years.
+
+Using snapshots of block devices when the workstation is powered down, we have annualised amortised costs of
+   - $40 for Chromebox depreciation
+   - $158.08 for the bare VM
+   - $133.12 for the Windows Server licence
+   - $8.52 for the block device storage while the workstation is ON
+   - $331.97 for snapshot storage
+   - Total: $671.09
+
+
+### Regional blob-backed caching virtual workstation
+
+Again, assuming a Chromebox is used instead with a purchase cost of $160 and depreciation over 4 years.
+
+To reduce latency for populating the cache, we assume that the block devices are created and the cache warmed up once per week.
+
+Using a small SSD block device of 256GB to cache the dataset stored on Regional (hot) GCS storage, we have amortised costs of
+   - $40 for Chromebox depreciation
+   - $158.08 for the bare VM
+   - $133.12 for the Windows Server licence
+   - $5.80 for the block device storage
+   - $19.97 for the snapshot of the SSD system disk
+   - $240.00 for Regional GCS storage of the dataset
+   - Total: $596.97
+
+### Nearline blob-backed caching virtual workstation
+
+Again, assuming a Chromebox is used instead with a purchase cost of $160 and depreciation over 4 years.
+
+To reduce latency for populating the cache, we assume that the block devices are created and the cache warmed up once per week.  Note that we have to pay for transfer costs from Nearline to warm up the cache.  We assume that each week we retrieve 256GB from Nearline to warm up the cache.
+
+Using a small SSD block device of 256GB to cache the dataset stored on Nearline (warm) GCS storage, we have amortised costs of
+   - $40 for Chromebox depreciation
+   - $158.08 for the bare VM
+   - $133.12 for the Windows Server licence
+   - $5.80 for the block device storage
+   - $19.97 for the snapshot of the SSD system disk
+   - $120.00 for Nearline GCS storage
+   - $133.12 for Nearline retrieval
+   - Total: $610.09
