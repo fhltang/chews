@@ -7,10 +7,10 @@ import config
 import config_context
 import cws
 
-def create(args):
-    # Hard code a config for now.  This should be parsed from a config
-    # file.
-    c = config.Config(
+# Hard code a config for now.  This should be parsed from a config
+# file.
+def Config(args):
+    return config.Config(
         provider='GCE',
         project=args.project,
         cloud_workstations=[
@@ -29,13 +29,31 @@ def create(args):
                 ],
                 location='us-east1-c',
                 image_family='debian-9'),
-            ])
+        ])
 
-    ctx = config_context.ConfigContext(c)
 
+def create(args):
+    ctx = config_context.ConfigContext(Config(args))
     workstation = cws.Cws(ctx, args.name)
-
     workstation.create()
+
+
+def stop(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.stop()
+
+
+def dessicate(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.dessicate()
+
+
+def destroy(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.destroy()
 
 
 parser = argparse.ArgumentParser(
@@ -49,6 +67,18 @@ parser.add_argument('--project', required=True, type=str, help='GCP project ID')
 create_parser = subparsers.add_parser('create')
 create_parser.add_argument('name')
 create_parser.set_defaults(func=create)
+
+stop_parser = subparsers.add_parser('stop')
+stop_parser.add_argument('name')
+stop_parser.set_defaults(func=stop)
+
+dessicate_parser = subparsers.add_parser('dessicate')
+dessicate_parser.add_argument('name')
+dessicate_parser.set_defaults(func=dessicate)
+
+destroy_parser = subparsers.add_parser('destroy')
+destroy_parser.add_argument('name')
+destroy_parser.set_defaults(func=destroy)
 
 if __name__ == '__main__':
     args = parser.parse_args()
