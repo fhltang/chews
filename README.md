@@ -11,3 +11,9 @@ See [Design](docs/design.md).
 
 Chews [originally had a more ambitious
 objective](docs/original_objective.md) which is currently infeasible.
+
+## Usage
+
+Set up
+
+    virtualenv --no-site-packages --distribute .env && source .env/bin/activate && pip install -r requirements.txt
