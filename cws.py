@@ -6,11 +6,14 @@ import hashlib
 
 import libcloud
 
+
 class Error(Exception):
     pass
 
+
 class StateError(Error):
     pass
+
 
 class Volume(object):
     _SALT = 'volume'
@@ -45,6 +48,34 @@ class Cws(object):
         self._context = context
         self._cws = self._context.get_cws(cws_name)
 
+        self._all_volumes = set()
+        self._snapshots = []
+        self._volume_count = 0
+        self._snapshot_count = 0
+
+        self._populate()
+
+    def _populate(self):
+        driver = self._context.driver()
+        self._all_volumes = set(v.name for v in driver.list_volumes())
+        all_snapshots = [s.name for s in driver.ex_list_snapshots()]
+
+        self._volume_count = 0
+        self._snapshot_count = 0
+        # Find the latest snapshot for each volume
+        self._snapshots = [None] * len(self._cws.volumes)
+        for i, vc in enumerate(self._cws.volumes):
+            v = Volume(self._context, self._cws.name, vc.name)
+            if v.unique_name() in self._all_volumes:
+                self._volume_count += 1
+            for s in all_snapshots:
+                if s.startswith(v.snapshot_name_prefix()):
+                    if self._snapshots[i] is None or s > self._snapshots[i]:
+                        self._snapshots[i] = s
+            if self._snapshots[i] is not None:
+                self._snapshot_count += 1
+
+
     def unique_name(self):
         return self._cws.name
 
@@ -52,28 +83,11 @@ class Cws(object):
         # Check if state is NOT_EXIST.
         # First determine if any volumes exist.
         driver = self._context.driver()
-        all_volumes = set()
-        all_snapshots = []
-        for v in driver.list_volumes():
-            all_volumes.add(v.name)
-            snapshots = [s.name for s in driver.list_volume_snapshots(v)]
-            all_snapshots.extend(snapshots)
             
-        volume_count = 0
-        snapshot_count = 0
-        for vc in self._cws.volumes:
-            v = Volume(self._context, self._cws.name, vc.name)
-            if v.unique_name() in all_volumes:
-                volume_count += 1
-            snapshots = [s for s in all_snapshots
-                         if s.startswith(v.snapshot_name_prefix())]
-            if len(snapshots) > 0:
-                snapshot_count += 1
-
-        if volume_count == 0 and snapshot_count == 0:
+        if self._volume_count == 0 and self._snapshot_count == 0:
             return CwsState.NOT_EXIST
 
-        if volume_count == len(self._context.get_volumes(self._cws.name)):
+        if self._volume_count == len(self._cws.volumes):
             # As a hack, use the GCE extension to get a Node by name.
             # libcloud has no native way to do this.
             try:
@@ -91,19 +105,22 @@ class Cws(object):
             elif node.state == 'stopped':
                 return CwsState.OFF
 
+        # State is considered to be DESSICATED only if each volume has
+        # at least one snapshot and the latest snapshot for each
+        # volume has the same timestamp (in the name).
+        if self._snapshot_count == len(self._cws.volumes):
+            timestamps = set()
+            for i, vc in enumerate(self._cws.volumes):
+                v = Volume(self._context, self._cws.name, vc.name)
+                snapshot_name = self._snapshots[i]
+                timestamps.add(snapshot_name[len(v.snapshot_name_prefix()):])
+            if len(timestamps) == 1:
+                return CwsState.DESSICATED
+
         return CwsState.UNRECOVERABLE_ERROR
 
-    def create(self):
-        if self.state() != CwsState.NOT_EXIST:
-            raise StateError('Cloud Workstation must be in state NOT_EXIST in order to Create.')
-
+    def _create_node_and_attach_volumes(self):
         driver = self._context.driver()
-        for i, vc in enumerate(self._cws.volumes):
-            image_family = None
-            if i == 0:
-                image_family = self._cws.image_family
-            v = Volume(self._context, self._cws.name, vc.name)
-            driver.create_volume(vc.size, v.unique_name(), location=self._cws.location, ex_image_family=image_family, use_existing=False, ex_disk_type=vc.volume_type)
 
         boot_volume = Volume(self._context, self._cws.name, self._cws.volumes[0].name)
         node = driver.create_node(
@@ -116,6 +133,22 @@ class Cws(object):
                 continue
             v = Volume(self._context, self._cws.name, vc.name)
             driver.attach_volume(node, driver.ex_get_volume(v.unique_name()), ex_boot=i==0)
+
+    def create(self):
+        if self.state() != CwsState.NOT_EXIST:
+            raise StateError('Cloud Workstation must be in state NOT_EXIST in order to Create.')
+
+        driver = self._context.driver()
+        for i, vc in enumerate(self._cws.volumes):
+            image_family = None
+            if i == 0:
+                image_family = self._cws.image_family
+            v = Volume(self._context, self._cws.name, vc.name)
+            driver.create_volume(
+                vc.size, v.unique_name(), location=self._cws.location,
+                ex_image_family=image_family, use_existing=False, ex_disk_type=vc.volume_type)
+
+        self._create_node()
 
     def stop(self):
         if self.state() != CwsState.ON:
@@ -138,10 +171,27 @@ class Cws(object):
         driver.destroy_node(node)
 
         volumes = self._context.get_volumes(self._cws.name)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         for volume in volumes:
             vol = Volume(self._context, self._cws.name, volume.name)
             v = driver.ex_get_volume(vol.unique_name())
-            timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
             snapshot_name = '%s%s' % (vol.snapshot_name_prefix(), timestamp)
             driver.create_volume_snapshot(v, snapshot_name)
             driver.destroy_volume(v)
+
+    def rehydrate(self):
+        state = self.state()
+        if state != CwsState.DESSICATED:
+            raise StateError('Cloud workstation must be in state DESSICATED to Rehydrate.  State is %s' % state)
+
+        driver = self._context.driver()
+
+        for i, vc in enumerate(self._cws.volumes):
+            snapshot = self._snapshots[i]
+            v = Volume(self._context, self._cws.name, vc.name)
+            driver.create_volume(
+                None, v.unique_name(), location=self._cws.location,
+                snapshot=snapshot, use_existing=False,
+                ex_disk_type=vc.volume_type)
+
+        self._create_node_and_attach_volumes()

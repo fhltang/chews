@@ -50,6 +50,12 @@ def dessicate(args):
     workstation.dessicate()
 
 
+def rehydrate(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.rehydrate()
+
+
 def destroy(args):
     ctx = config_context.ConfigContext(Config(args))
     workstation = cws.Cws(ctx, args.name)
@@ -75,6 +81,10 @@ stop_parser.set_defaults(func=stop)
 dessicate_parser = subparsers.add_parser('dessicate')
 dessicate_parser.add_argument('name')
 dessicate_parser.set_defaults(func=dessicate)
+
+rehydrate_parser = subparsers.add_parser('rehydrate')
+rehydrate_parser.add_argument('name')
+rehydrate_parser.set_defaults(func=rehydrate)
 
 destroy_parser = subparsers.add_parser('destroy')
 destroy_parser.add_argument('name')

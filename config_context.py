@@ -10,7 +10,7 @@ class ConfigContext(object):
         self._config = config
 
         self._cloud_workstations = {}
-        self._volumes = {}
+        self._volumes_by_cws = {}
         self._build_indexes()
 
         # Only support GCE for now
