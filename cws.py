@@ -49,7 +49,15 @@ class Cws(object):
         self._cws = self._context.get_cws(cws_name)
 
         self._all_volumes = set()
+
+        # List of lists of snapshot names.  i-th index is a list of
+        # snapshots for the i-th volume in self._cws.volumes .
         self._snapshots = []
+
+        # List of snapshot names.  i-th index is the newest snapshot
+        # (or None) for the i-th volume in self._cws.volumes .
+        self._newest_snapshots = []
+
         self._volume_count = 0
         self._snapshot_count = 0
 
@@ -60,19 +68,24 @@ class Cws(object):
         self._all_volumes = set(v.name for v in driver.list_volumes())
         all_snapshots = [s.name for s in driver.ex_list_snapshots()]
 
+        self._snapshots = []
+        self._newest_snapshots = [None] * len(self._cws.volumes)
         self._volume_count = 0
         self._snapshot_count = 0
-        # Find the latest snapshot for each volume
-        self._snapshots = [None] * len(self._cws.volumes)
         for i, vc in enumerate(self._cws.volumes):
             v = Volume(self._context, self._cws.name, vc.name)
             if v.unique_name() in self._all_volumes:
                 self._volume_count += 1
+
+            snapshots = []
             for s in all_snapshots:
                 if s.startswith(v.snapshot_name_prefix()):
-                    if self._snapshots[i] is None or s > self._snapshots[i]:
-                        self._snapshots[i] = s
-            if self._snapshots[i] is not None:
+                    snapshots.append(s)
+                    if self._newest_snapshots[i] is None or s > self._newest_snapshots[i]:
+                        self._newest_snapshots[i] = s
+            snapshots.sort()
+            self._snapshots.append(snapshots)
+            if self._newest_snapshots[i] is not None:
                 self._snapshot_count += 1
 
 
@@ -112,7 +125,7 @@ class Cws(object):
             timestamps = set()
             for i, vc in enumerate(self._cws.volumes):
                 v = Volume(self._context, self._cws.name, vc.name)
-                snapshot_name = self._snapshots[i]
+                snapshot_name = self._newest_snapshots[i]
                 timestamps.add(snapshot_name[len(v.snapshot_name_prefix()):])
             if len(timestamps) == 1:
                 return CwsState.DESSICATED
@@ -187,7 +200,7 @@ class Cws(object):
         driver = self._context.driver()
 
         for i, vc in enumerate(self._cws.volumes):
-            snapshot = self._snapshots[i]
+            snapshot = self._newest_snapshots[i]
             v = Volume(self._context, self._cws.name, vc.name)
             driver.create_volume(
                 None, v.unique_name(), location=self._cws.location,
@@ -213,3 +226,16 @@ class Cws(object):
         driver = self._context.driver()
         node = driver.ex_get_node(self.unique_name())
         driver.ex_stop_node(node)
+
+    def tidy_snapshots(self):
+        if self.state() == CwsState.NOT_EXIST:
+            raise StateError('Cloud workstation cannot be in state NO_EXIST for TidySnapshots.')
+
+        driver = self._context.driver()
+
+        for i, vc in enumerate(self._cws.volumes):
+            snapshots = self._snapshots[i]
+            for snapshot in snapshots[:-vc.max_snapshots]:
+                s = driver.ex_get_snapshot(snapshot)
+                driver.destroy_volume_snapshot(s)
+

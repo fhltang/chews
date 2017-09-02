@@ -12,6 +12,7 @@ VolumeConfig = collections.namedtuple('DiskConfig', [
     'name',  # string, scoped within Cloud workstation config
     'size',  # number, size in GB
     'volume_type',  # string, e.g. 'pd-standard' or 'pd-ssd'
+    'max_snapshots',  # number, how many snapshots to keep - must be at least 1
 ])
 
 # Cloud workstation config

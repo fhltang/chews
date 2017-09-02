@@ -21,11 +21,13 @@ def Config(args):
                     config.VolumeConfig(
                         name='boot',
                         size=50,
-                        volume_type='pd-ssd'),
+                        volume_type='pd-ssd',
+                        max_snapshots=2),
                     config.VolumeConfig(
                         name='data',
                         size=100,
-                        volume_type='pd-standard'),
+                        volume_type='pd-standard',
+                        max_snapshots=2),
                 ],
                 location='us-east1-c',
                 image_family='debian-9'),
@@ -68,6 +70,12 @@ def powerdown(args):
     workstation.powerdown()
 
 
+def tidysnapshots(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.tidy_snapshots()
+
+
 parser = argparse.ArgumentParser(
     description='Tool to manage life cycle of Cloud Workstations')
 subparsers = parser.add_subparsers()
@@ -99,6 +107,10 @@ powerup_parser.set_defaults(func=powerup)
 powerdown_parser = subparsers.add_parser('powerdown')
 powerdown_parser.add_argument('name')
 powerdown_parser.set_defaults(func=powerdown)
+
+tidysnapshots_parser = subparsers.add_parser('tidysnapshots')
+tidysnapshots_parser.add_argument('name')
+tidysnapshots_parser.set_defaults(func=tidysnapshots)
 
 if __name__ == '__main__':
     args = parser.parse_args()
