@@ -56,10 +56,16 @@ def rehydrate(args):
     workstation.rehydrate()
 
 
-def destroy(args):
+def powerup(args):
     ctx = config_context.ConfigContext(Config(args))
     workstation = cws.Cws(ctx, args.name)
-    workstation.destroy()
+    workstation.powerup()
+
+
+def powerdown(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    workstation.powerdown()
 
 
 parser = argparse.ArgumentParser(
@@ -86,9 +92,13 @@ rehydrate_parser = subparsers.add_parser('rehydrate')
 rehydrate_parser.add_argument('name')
 rehydrate_parser.set_defaults(func=rehydrate)
 
-destroy_parser = subparsers.add_parser('destroy')
-destroy_parser.add_argument('name')
-destroy_parser.set_defaults(func=destroy)
+powerup_parser = subparsers.add_parser('powerup')
+powerup_parser.add_argument('name')
+powerup_parser.set_defaults(func=powerup)
+
+powerdown_parser = subparsers.add_parser('powerdown')
+powerdown_parser.add_argument('name')
+powerdown_parser.set_defaults(func=powerdown)
 
 if __name__ == '__main__':
     args = parser.parse_args()

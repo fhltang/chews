@@ -195,3 +195,21 @@ class Cws(object):
                 ex_disk_type=vc.volume_type)
 
         self._create_node_and_attach_volumes()
+
+    def powerup(self):
+        state = self.state()
+        if state != CwsState.OFF:
+            raise StateError('Cloud workstation must be in state OFF to Powerup.  State is %s' % state)
+
+        driver = self._context.driver()
+        node = driver.ex_get_node(self.unique_name())
+        driver.ex_start_node(node)
+
+    def powerdown(self):
+        state = self.state()
+        if state != CwsState.ON:
+            raise StateError('Cloud workstation must be in state ON to Powerdown.  State is %s' % state)
+
+        driver = self._context.driver()
+        node = driver.ex_get_node(self.unique_name())
+        driver.ex_stop_node(node)
