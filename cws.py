@@ -92,6 +92,13 @@ class Cws(object):
     def unique_name(self):
         return self._cws.name
 
+
+    def volumes(self):
+        return [Volume(self._context, self._cws.name, v.name) for v in self._cws.volumes]
+
+    def snapshot_names(self):
+        return self._snapshots
+
     def state(self):
         # Check if state is NOT_EXIST.
         # First determine if any volumes exist.

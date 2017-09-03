@@ -68,15 +68,23 @@ def tidysnapshots(args):
     workstation.tidy_snapshots()
 
 
-def printstate(args):
-    ctx = config_context.ConfigContext(Config(args))
-    workstation = cws.Cws(ctx, args.name)
-    print(workstation.state())
-
-
 def printconfig(args):
     config = Config(args)
     print text_format.MessageToString(config)
+
+
+def printassetnames(args):
+    config = Config(args)
+    ctx = config_context.ConfigContext(config)
+    for w in config.cloud_workstations:
+        workstation = cws.Cws(ctx, w.name)
+        print "Workstation", workstation.unique_name()
+        print "  State", workstation.state()
+        snapshots = workstation.snapshot_names()
+        for i, volume in enumerate(workstation.volumes()):
+            print "  Volume", volume.unique_name()
+            for snapshot in snapshots[i]:
+                print "    Snapshot", snapshot
 
 
 parser = argparse.ArgumentParser(
@@ -116,12 +124,11 @@ tidysnapshots_parser = subparsers.add_parser('tidysnapshots')
 tidysnapshots_parser.add_argument('name')
 tidysnapshots_parser.set_defaults(func=tidysnapshots)
 
-printstate_parser = subparsers.add_parser('printstate')
-printstate_parser.add_argument('name')
-printstate_parser.set_defaults(func=printstate)
-
 printconfig_parser = subparsers.add_parser('printconfig')
 printconfig_parser.set_defaults(func=printconfig)
+
+printassetnames_parser = subparsers.add_parser('printassetnames')
+printassetnames_parser.set_defaults(func=printassetnames)
 
 if __name__ == '__main__':
     args = parser.parse_args()
