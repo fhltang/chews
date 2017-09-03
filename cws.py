@@ -168,7 +168,7 @@ class Cws(object):
                 vc.size, v.unique_name(), location=self._cws.location,
                 ex_image_family=image_family, use_existing=False, ex_disk_type=vc.volume_type)
 
-        self._create_node()
+        self._create_node_and_attach_volumes()
 
     def stop(self):
         if self.state() != CwsState.ON:
