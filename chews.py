@@ -2,6 +2,7 @@
 
 import argparse
 
+from google.protobuf import text_format
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 
@@ -12,28 +13,17 @@ import cws
 # Hard code a config for now.  This should be parsed from a config
 # file.
 def Config(args):
-    return config_pb2.Config(
-        provider='GCE',
-        project=args.project,
-        cloud_workstations=[
-            config_pb2.CwsConfig(
-                name='test',
-                node=config_pb2.NodeConfig(size='n1-standard-2'),
-                volumes=[
-                    config_pb2.VolumeConfig(
-                        name='boot',
-                        size=50,
-                        volume_type='pd-ssd',
-                        max_snapshots=2),
-                    config_pb2.VolumeConfig(
-                        name='data',
-                        size=100,
-                        volume_type='pd-standard',
-                        max_snapshots=2),
-                ],
-                location='us-east1-c',
-                image_family='debian-9'),
-        ])
+    config = config_pb2.Config()
+    with open(args.config_file) as f:
+        text_format.Merge(f.read(), config)
+
+    # Optionally override config fields.
+    if args.project:
+        config.project = args.project
+
+    config_context.ConfigValidator(config).validate()
+
+    return config
 
 
 def create(args):
@@ -78,13 +68,19 @@ def tidysnapshots(args):
     workstation.tidy_snapshots()
 
 
+def printconfig(args):
+    config = Config(args)
+    print text_format.MessageToString(config)
+
+
 parser = argparse.ArgumentParser(
     description='Tool to manage life cycle of Cloud Workstations')
 subparsers = parser.add_subparsers()
 
 # Project should be specified in the config.  Pass this in as a flag
 # for now so that I do not leak a specific GCP project id in github.
-parser.add_argument('--project', required=True, type=str, help='GCP project ID')
+parser.add_argument('--project', type=str, help='GCP project ID')
+parser.add_argument('--config_file', type=str, help='Path to configuration file', required=True)
 
 create_parser = subparsers.add_parser('create')
 create_parser.add_argument('name')
@@ -113,6 +109,9 @@ powerdown_parser.set_defaults(func=powerdown)
 tidysnapshots_parser = subparsers.add_parser('tidysnapshots')
 tidysnapshots_parser.add_argument('name')
 tidysnapshots_parser.set_defaults(func=tidysnapshots)
+
+printconfig_parser = subparsers.add_parser('printconfig')
+printconfig_parser.set_defaults(func=printconfig)
 
 if __name__ == '__main__':
     args = parser.parse_args()
