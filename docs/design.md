@@ -104,6 +104,8 @@ might look like.
 
 ### Create a new workstation
 
+Status: IMPLEMENTED
+
    1. Edit configuration file and define a new workstation, specifying
       the workstation name, size, its disks and a location for where it
       should be created.
@@ -114,6 +116,8 @@ might look like.
 Workstation end state: ON
 
 ### Power down
+
+Status: IMPLEMENTED
 
 After using the workstation, it is time to go to the pub.  The
 workstation will not be used until the next day.  We can save some
@@ -126,6 +130,8 @@ Workstation end state: OFF
 
 ### Power up
 
+Status: IMPLEMENTED
+
 It is the next day.  The hangover from drinking in the pub is not too
 bad.  It is time to use the workstation again.  The workstation is
 powered up by starting the VM Instance.
@@ -133,6 +139,8 @@ powered up by starting the VM Instance.
 Workstation end state: ON
 
 ### Dessicate
+
+Status: IMPLEMENTED
 
 It is time to go on vacation.  The workstation will not be used for
 weeks.  We can save some money by not paying for the virtual block
@@ -145,6 +153,8 @@ the block devices are deleted.  The VM Instance is deleted.
 Workstation end state: DESSICATED
 
 ### Rehydrate
+
+Status: IMPLEMENTED
 
 Back from vacation, it is time to use the workstation again.
 
@@ -172,6 +182,8 @@ assets do not follow the naming conventions.
 
 ### VM Instance Resize
 
+Status: IMPLEMENTED
+
 The VM Instance does not have enough memory or cpu cores.
 (Alternatively, the VM Instance has surplus memory or cpu cores and
 costs too much.)
@@ -185,6 +197,8 @@ Editing the configuration file is required so that the workstation is
 created with the correct size on Rehydration.
 
 ### Change a disk type
+
+Status: IMPLEMENTED
 
 A disk is currently an HDD-backed block device.  Changing it to an
 SSD-backed block device would improve performance.  (Similarly,
@@ -216,3 +230,10 @@ are managed.
    4. Run command to Rehydrate workstation.
    5. [Grow only] Use the OS to expand the partitions and filesystem
       to use the extra space on the disk.
+
+### Recover from inconsistent state
+
+The last run of a command was interrupted.  The assets are in states that
+are inconsistent with any normal state for the workstation.
+
+There should be an easy way to recover.
