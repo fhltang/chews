@@ -68,6 +68,12 @@ def tidysnapshots(args):
     workstation.tidy_snapshots()
 
 
+def printstatus(args):
+    ctx = config_context.ConfigContext(Config(args))
+    workstation = cws.Cws(ctx, args.name)
+    print(workstation.state())
+
+
 def printconfig(args):
     config = Config(args)
     print text_format.MessageToString(config)
@@ -109,6 +115,10 @@ powerdown_parser.set_defaults(func=powerdown)
 tidysnapshots_parser = subparsers.add_parser('tidysnapshots')
 tidysnapshots_parser.add_argument('name')
 tidysnapshots_parser.set_defaults(func=tidysnapshots)
+
+printstatus_parser = subparsers.add_parser('printstatus')
+printstatus_parser.add_argument('name')
+printstatus_parser.set_defaults(func=printstatus)
 
 printconfig_parser = subparsers.add_parser('printconfig')
 printconfig_parser.set_defaults(func=printconfig)
