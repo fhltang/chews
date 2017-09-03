@@ -5,27 +5,27 @@ import argparse
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 
-import config
+from genfiles import config_pb2
 import config_context
 import cws
 
 # Hard code a config for now.  This should be parsed from a config
 # file.
 def Config(args):
-    return config.Config(
+    return config_pb2.Config(
         provider='GCE',
         project=args.project,
         cloud_workstations=[
-            config.CwsConfig(
+            config_pb2.CwsConfig(
                 name='test',
-                node=config.NodeConfig(size='n1-standard-2'),
+                node=config_pb2.NodeConfig(size='n1-standard-2'),
                 volumes=[
-                    config.VolumeConfig(
+                    config_pb2.VolumeConfig(
                         name='boot',
                         size=50,
                         volume_type='pd-ssd',
                         max_snapshots=2),
-                    config.VolumeConfig(
+                    config_pb2.VolumeConfig(
                         name='data',
                         size=100,
                         volume_type='pd-standard',

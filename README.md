@@ -16,4 +16,7 @@ objective](docs/original_objective.md) which is currently infeasible.
 
 Set up
 
+    sudo apt-get install protobuf
     virtualenv --no-site-packages --distribute .env && source .env/bin/activate && pip install -r requirements.txt
+    make chews
+

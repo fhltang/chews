@@ -3,8 +3,6 @@
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
 
-import config
-
 class ConfigContext(object):
     def __init__(self, config):
         self._config = config
