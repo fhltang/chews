@@ -9,7 +9,8 @@ message NodeConfig {
 }
 
 message VolumeConfig {
-  // Volume name.  Only needs to unique within CwsWorkstation.  Examples: 'boot', 'data'.
+  // Volume name.  Only needs to unique within CwsWorkstation.
+  // Examples: 'boot', 'data'.
   optional string name = 1;
 
   // Volume size in GB.
@@ -39,7 +40,9 @@ message CwsConfig {
   // GCP location, e.g. 'us-west1-a'.
   optional string location = 4;
 
-  // Image family used on creation.  Examples: 'debian-9', 'windows-cloud'.
+  // Image family used on creation.  Examples: 'debian-9',
+  // 'windows-2016'.  See
+  // https://console.cloud.google.com/compute/images
   optional string image_family = 5;
 }
 
