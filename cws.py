@@ -1,8 +1,8 @@
 # Code for managing life cycle of Cloud Workstations.
 
-import datetime
 import enum
 import hashlib
+import time
 
 import libcloud
 
@@ -24,13 +24,13 @@ class Volume(object):
         self._volume = self._context.get_volume(cws_name, volume_name)
 
     def unique_name(self):
+        # Append the first six digits of the SHA1 hash.
         full_name = '%s-%s' % (self._cws.name, self._volume.name)
-        m = hashlib.md5()
-        m.update('%s%s' % (full_name, self._SALT))
-        return '%s-%s' % (full_name, m.hexdigest())
+        m = hashlib.sha1('%s%s' % (full_name, self._SALT))
+        return '%s-%s' % (full_name, m.hexdigest()[:6])
 
     def snapshot_name_prefix(self):
-        return 'ss-%s-' % self.unique_name()
+        return '%s-' % self.unique_name()
 
 
 # Cloud Workstation states
@@ -191,7 +191,7 @@ class Cws(object):
         driver.destroy_node(node)
 
         volumes = self._context.get_volumes(self._cws.name)
-        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        timestamp = '%.10d' % int(time.time())
         for volume in volumes:
             vol = Volume(self._context, self._cws.name, volume.name)
             v = driver.ex_get_volume(vol.unique_name())
