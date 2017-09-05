@@ -60,11 +60,11 @@ states to cloud asset states.
 | State      | VM Instance        | Block Devices | Snapshots |
 | ---------- | ------------------ | ------------- | --------- |
 | ON         | Exists and running | Exist         | May exist |
-| OFF        | Exists but stoped  | Exist         | May exist |
+| OFF        | Exists but stopped | Exist         | May exist |
 | DESSICATED | Absent             | Absent        | Exist     |
 | NOT_EXIST  | Absent             | Absent        | Absent    |
 
-The NOT_EXIST state is no a normal state but describes the state
+The NOT_EXIST state is not a normal state but describes the state
 before the workstation is created or after it is deleted.
 
 ### Asset names
@@ -75,7 +75,7 @@ other.  The implementation will use naming conventions to tie the
 assets together.
 
 Name collisions would be bad: not only would it cause problems
-creating the cloud asset but there is the risk that the we may
+creating the cloud asset but there is the risk that we may
 unintentionally interfere with other cloud assets.  To minimise name
 collisions, the implementation inserts hashes into the names of block
 devices and snapshots.
@@ -99,7 +99,7 @@ Specifically:
 
 ## Use Cases
 
-Here are a list of use cases and an description of what the workflow
+Here are a list of use cases and a description of what the workflow
 might look like.
 
 ### Create a new workstation
