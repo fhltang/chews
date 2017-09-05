@@ -114,16 +114,16 @@ You can check the state of the workstation using the `printassets` command:
 The easiest way to switch off the workstation is from the OS on the VM
 instance itself.
 
-Alternatively, you can use the `poweroff` command:
+Alternatively, you can use the `powerdown` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} poweroff test
+    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} powerdown test
 
 #### Switching on the workstation
 
 If the workstation is in state OFF, you can switch it on using the
-`poweron` command:
+`powerup` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} poweron test
+    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} powerup test
 
 Alternatively, you can just find and start the VM instance using the GCP console.
 
@@ -139,6 +139,11 @@ To dessicate, the workstation has to be in state OFF, you can use the
 `dessicate` command:
 
     ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} dessicate test
+
+Now to save some space, we can delete some old snapshots using the
+`tidysnapshots` command:
+
+    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} tidysnapshots test
 
 #### Rehydrating the workstation
 
