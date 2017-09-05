@@ -177,3 +177,42 @@ Note that you should not store your configuration file only on the
 Google Cloud Shell.  The Cloud Shell is automatically deleted if you
 do not use it for a while.  It is better to store your configuration
 file in a source code repository elsewhere.
+
+### When things go wrong
+
+Unfortunately, there has been no effort (yet) to implement recovery of
+workstations from non-standard states.  It is easily possible to end
+up with assets in states which do not match a canonical workstation
+state, e.g. when the `chews` script is interrupted, or when the assets
+have been changed externally.
+
+When this happens, you will have to manually change the assets until
+they match a canonical state.  The easiest state to transition to
+DESSICATED.  To get to this state, you have make sure there is a
+snapshot for each disk with the correct names.
+
+The naming convention for disks is
+
+    ${workstation_name}-${disk_name}-${hash}
+
+and for snapshots is
+
+    ${workstation_name}-${disk_name}-${hash}-${timestamp}
+
+The hash is computed by the chews and is the same value for both disks
+and their snapshots.  You can use `printassets` command to determine
+the hash.
+
+Then pick a timestamp in seconds since epoch (in UTC) that is later
+than the timestamp used for any existing snapshots.  Ideally, you want
+to pick a timestamp in the past to make sure that any future snapshots
+are created with a larger timestamp.  The easiest way is to look at
+the existing snapshot names, find the one with the greatest timestamp
+and then increment that timestamp by 1.  If there are no snapshots,
+then pick a timestamp of '0000000000' (five consecutive 0s).
+
+Finally, create a snapshot for each disk using the your chosen
+timestamp.  Note that the timestamp has to be the same for all disks.
+
+After this, delete the VM instance and the disks.  The workstation
+should now be in state DESSICATED and you should be able to Rehydrate.
