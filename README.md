@@ -68,6 +68,10 @@ Explanation of the installation steps:
       then use `pip` to install python library dependencies.
    4. Use `make` to compile the protobuf definitions.
 
+Note that you will need to run the `virtualenv` line each time (or at
+the very least the `source .env/bin/activate' command) to set up the
+environment before running Chews.
+
 ### Create a cloud workstation
 
 We can reuse the example workstations in the config file in `configs/test.config`.
