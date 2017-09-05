@@ -12,6 +12,14 @@ See [Design](docs/design.md).
 Chews [originally had a more ambitious
 objective](docs/original_objective.md) which is currently infeasible.
 
+Before, the use case was analogous to the Zipcar of workstations: rather than
+own your own workstation, you rent one whenever you need one.
+
+Now, the use case is analogous to the U-Haul of workstations: you own
+your own physical workstation, but when you need something different
+for a specific purpose (e.g. more ram, cpu cores or a different OS),
+you rent it.
+
 ## Usage
 
 The scripts currently support maintaining the cloud workstation life
