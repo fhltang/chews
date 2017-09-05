@@ -209,6 +209,13 @@ would save money.)
    2. Dessicate the workstation.
    3. Rehydrate the workstation.
 
+
+### Estimate workstation hourly cost
+
+After editing the configuration file, obtain an estimate of how much
+it would cost to keep the workstation in states ON, OFF and
+DESSICATED.
+
 ### Add extra disks to workstation
 
 The VM Instance does not have enough disks.
