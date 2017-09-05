@@ -60,6 +60,14 @@ Install chews:
     virtualenv --no-site-packages --distribute .env && source .env/bin/activate && pip install -r requirements.txt
     make chews
 
+Explanation of the installation steps:
+
+   1. Install package `protobuf` to bring in the protobuf compiler.
+   2. Fetch the sources for Chews.
+   3. Use `virtualenv` to create and activate a virtual environment
+      then use `pip` to install python library dependencies.
+   4. Use `make` to compile the protobuf definitions.
+
 ### Create a cloud workstation
 
 We can reuse the example workstations in the config file in `configs/test.config`.
@@ -145,3 +153,17 @@ Sorry, this is not implemented yet.
 You will have to delete any GCE assets (VM instance, disks and
 snapshots) manually.  You can determine the names of the assets using
 the `printassets` commmand.
+
+#### Writing your own configuration
+
+Chews reads the workstation configuration from a file.  The format of
+the file a text-format
+[protobuf](https://developers.google.com/protocol-buffers/) message.
+The [example configuration](configs/test.config) illustrates the
+syntax.  There is documentation about the different configuration
+fields in the [protobuf definition](proto/config.proto).
+
+Note that you should not store your configuration file only on the
+Google Cloud Shell.  The Cloud Shell is automatically deleted if you
+do not use it for a while.  It is better to store your configuration
+file in a source code repository elsewhere.
