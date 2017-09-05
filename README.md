@@ -156,7 +156,8 @@ Sorry, this is not implemented yet.
 
 You will have to delete any GCE assets (VM instance, disks and
 snapshots) manually.  You can determine the names of the assets using
-the `printassets` commmand.
+the `printassets` command as explained in the Section [Checking
+workstation state](#checking-workstation-state).
 
 #### Writing your own configuration
 
