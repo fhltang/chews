@@ -73,7 +73,7 @@ def printconfig(args):
     print text_format.MessageToString(config)
 
 
-def printassetnames(args):
+def printassets(args):
     config = Config(args)
     ctx = config_context.ConfigContext(config)
     for w in config.cloud_workstations:
@@ -127,8 +127,8 @@ tidysnapshots_parser.set_defaults(func=tidysnapshots)
 printconfig_parser = subparsers.add_parser('printconfig')
 printconfig_parser.set_defaults(func=printconfig)
 
-printassetnames_parser = subparsers.add_parser('printassetnames')
-printassetnames_parser.set_defaults(func=printassetnames)
+printassets_parser = subparsers.add_parser('printassets')
+printassets_parser.set_defaults(func=printassets)
 
 if __name__ == '__main__':
     args = parser.parse_args()
