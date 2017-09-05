@@ -23,6 +23,13 @@ message VolumeConfig {
 
   // Number of snapshots to keep.  Must be at least 1.  Safe to change
   // after the workstation has been created.
+  //
+  // Note that although GCP implements differential snapshots, the
+  // snapshots created by Chews cannot shared blocks since the
+  // original disks are deleted between creation of snapshots.  This
+  // means that whenever a new snapshot is created, it cannot
+  // correlate existing snapshots as previous versions of the disk.
+  // As a result, each snapshot is full sized.
   optional int32 max_snapshots = 4;
 }
 
