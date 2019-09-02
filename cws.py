@@ -17,7 +17,7 @@ class StateError(Error):
 
 class Volume(object):
     _SALT = 'volume'
-    
+
     def __init__(self, context, cws_name, volume_name):
         self._context = context
         self._cws = self._context.get_cws(cws_name)
@@ -42,7 +42,7 @@ class CwsState(enum.Enum):
     RECOVERABLE_ERROR = 4  # A non-standard state which can be recovered
     UNRECOVERABLE_ERROR = 5  # A non-standard state which requires operator intervention
 
-    
+
 class Cws(object):
     def __init__(self, context, cws_name):
         self._context = context
