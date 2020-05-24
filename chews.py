@@ -1,4 +1,4 @@
-#!.env/bin/python2
+#!.env/bin/python
 
 import argparse
 
@@ -70,7 +70,7 @@ def tidysnapshots(args):
 
 def printconfig(args):
     config = Config(args)
-    print text_format.MessageToString(config)
+    print(text_format.MessageToString(config))
 
 
 def printassets(args):
@@ -78,13 +78,13 @@ def printassets(args):
     ctx = config_context.ConfigContext(config)
     for w in config.cloud_workstations:
         workstation = cws.Cws(ctx, w.name)
-        print "Workstation", workstation.unique_name()
-        print "  State", workstation.state()
+        print("Workstation", workstation.unique_name())
+        print("  State", workstation.state())
         snapshots = workstation.snapshot_names()
         for i, volume in enumerate(workstation.volumes()):
-            print "  Volume", volume.unique_name()
+            print("  Volume", volume.unique_name())
             for snapshot in snapshots[i]:
-                print "    Snapshot", snapshot
+                print("    Snapshot", snapshot)
 
 
 parser = argparse.ArgumentParser(
