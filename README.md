@@ -57,7 +57,7 @@ Install chews:
     sudo apt-get install protobuf
     git clone https://github.com/fhltang/chews.git
     cd chews
-    virtualenv --no-site-packages --distribute .env && source .env/bin/activate && pip install -r requirements.txt
+    virtualenv .env && source .env/bin/activate && pip install -r requirements.txt
     make chews
 
 Explanation of the installation steps:
