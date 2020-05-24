@@ -54,23 +54,22 @@ Start Google Cloud Shell using the icon in the top right of the GCP Console.
 
 Install chews:
 
-    sudo apt-get install protobuf
     git clone https://github.com/fhltang/chews.git
     cd chews
-    virtualenv .env && source .env/bin/activate && pip install -r requirements.txt
-    make chews
+    docker build -t chews .
 
-Explanation of the installation steps:
+Now set up a convenience alias:
 
-   1. Install package `protobuf` to bring in the protobuf compiler.
-   2. Fetch the sources for Chews.
-   3. Use `virtualenv` to create and activate a virtual environment
-      then use `pip` to install python library dependencies.
-   4. Use `make` to compile the protobuf definitions.
+    CONFIG=configs/test.config
+    alias chews="docker run -it chews --config_file ${CONFIG} --project ${MY_PROJECT?}"
 
-Note that you will need to run the `virtualenv` line each time (or at
-the very least the `source .env/bin/activate' command) to set up the
-environment before running Chews.
+This will build a `docker` image. To verify that this was successful, print the
+test config:
+
+    chews printconfig
+
+The config files must be in the container so to use your own config, you will need
+to bind mount a volume e.g. by passing the `-v` argument to `docker run`.
 
 ### Create a cloud workstation
 
@@ -78,8 +77,7 @@ We can reuse the example workstations in the config file in `configs/test.config
 
 To create the Debian workstation:
 
-    CONFIG=configs/test.config
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} create test
+    chews create test
 
 In the current implementation, the workstation is in state ON after
 creation.
@@ -99,7 +97,7 @@ e.g. format and mount any extra disks.
 
 You can check the state of the workstation using the `printassets` command:
 
-    $ ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} printassets
+    $ chews printassets
     Workstation test
       State CwsState.ON
       Volume test-boot-b1821a
@@ -116,14 +114,26 @@ instance itself.
 
 Alternatively, you can use the `powerdown` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} powerdown test
+    chews powerdown test
+
+Confirm status
+
+    $ chews printassets
+    Workstation test
+      State CwsState.OFF
+      Volume test-boot-b1821a
+      Volume test-data-230eeb
+    Workstation win-test
+      State CwsState.NOT_EXIST
+      Volume win-test-boot-bc9a92
+      Volume win-test-data-53d695
 
 #### Switching on the workstation
 
 If the workstation is in state OFF, you can switch it on using the
 `powerup` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} powerup test
+    chews powerup test
 
 Alternatively, you can just find and start the VM instance using the GCP console.
 
@@ -138,19 +148,34 @@ the disks) and delete the VM instance and its block devices.
 To dessicate, the workstation has to be in state OFF, you can use the
 `dessicate` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} dessicate test
+    chews dessicate test
 
-Now to save some space, we can delete some old snapshots using the
+Check status of dessicated workstation:
+
+    $ chews printassets
+    Workstation test
+      State CwsState.DESSICATED
+      Volume test-boot-b1821a
+        Snapshot test-boot-b1821a-1590360677
+      Volume test-data-230eeb
+        Snapshot test-data-230eeb-1590360677
+    Workstation win-test
+      State CwsState.NOT_EXIST
+      Volume win-test-boot-bc9a92
+      Volume win-test-data-53d695
+
+If you have dessicated more than once, you will have some old snapshots hanging around.
+To save some space, we can delete some old snapshots using the
 `tidysnapshots` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} tidysnapshots test
+    chews tidysnapshots test
 
 #### Rehydrating the workstation
 
 To use a dessicated workstation, you have to Rehydrate it using the
 `rehydrate` command:
 
-    ./chews.py --config_file ${CONFIG} --project ${MY_PROJECT?} rehydrate test
+    chews rehydrate test
 
 In the current implementation, the workstation is in state ON
 immediately after rehydration.
@@ -172,6 +197,12 @@ the file a text-format
 The [example configuration](configs/test.config) illustrates the
 syntax.  There is documentation about the different configuration
 fields in the [protobuf definition](proto/config.proto).
+
+To make your config file accessible to the docker image, you will need
+to bind mount it.  For example, if your config is file
+`myconfigs/chews.config`, you can define your alias as follows
+
+    alias chews="docker run -it --read-only -v $(pwd)/myconfigs:/configs chews --config_file /configs/chews.config --project=${MY_PROJECT?}"
 
 Note that you should not store your configuration file only on the
 Google Cloud Shell.  The Cloud Shell is automatically deleted if you
@@ -209,7 +240,7 @@ to pick a timestamp in the past to make sure that any future snapshots
 are created with a larger timestamp.  The easiest way is to look at
 the existing snapshot names, find the one with the greatest timestamp
 and then increment that timestamp by 1.  If there are no snapshots,
-then pick a timestamp of '0000000000' (five consecutive 0s).
+then pick a timestamp of '0000000000' (ten consecutive 0s).
 
 Finally, create a snapshot for each disk using the your chosen
 timestamp.  Note that the timestamp has to be the same for all disks.
