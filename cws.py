@@ -26,7 +26,7 @@ class Volume(object):
     def unique_name(self):
         # Append the first six digits of the SHA1 hash.
         full_name = '%s-%s' % (self._cws.name, self._volume.name)
-        m = hashlib.sha1('%s%s' % (full_name, self._SALT))
+        m = hashlib.sha1(('%s%s' % (full_name, self._SALT)).encode())
         return '%s-%s' % (full_name, m.hexdigest()[:6])
 
     def snapshot_name_prefix(self):
