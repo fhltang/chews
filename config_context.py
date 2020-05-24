@@ -119,7 +119,7 @@ class ConfigContext(object):
         # Returned volumes order is non-deterministic.  This will have
         # to do for now.
         volumes = []
-        for (name, _), v in self._volumes.iteritems():
+        for (name, _), v in self._volumes.items():
             if name == cws_name:
                 volumes.append(v)
         return volumes
