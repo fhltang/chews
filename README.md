@@ -86,7 +86,10 @@ Once the `create` command completes, the workstation is created.  You
 can ssh into workstation using the normal GCE methods.  For example,
 from the [VM instances
 console](https://console.cloud.google.com/compute/instances) you can
-find the VM instance and connect using the SSH option.
+find the VM instance and connect using the SSH option, or you can use
+the `gcloud` command
+
+    gcloud compute ssh test
 
 On initial creation, you will have to set up the workstation,
 e.g. format and mount any extra disks.
