@@ -1,11 +1,10 @@
-FROM python:3
+FROM python:3-alpine
 
 WORKDIR /usr/src/app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        protobuf-compiler \
- && rm -rf /var/lib/apt/lists/*
+RUN apk add \
+      protobuf \
+      make
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
