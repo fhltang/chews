@@ -54,9 +54,7 @@ Start Google Cloud Shell using the icon in the top right of the GCP Console.
 
 Install chews:
 
-    git clone https://github.com/fhltang/chews.git
-    cd chews
-    docker build -t chews .
+    docker build -t chews https://github.com/fhltang/chews.git
 
 Now set up a convenience alias:
 
