@@ -1,9 +1,8 @@
-apache-libcloud==2.1.0
-certifi==2020.4.5.1
-chardet==3.0.4
-enum34==1.1.10
-idna==2.9
-protobuf==3.11.2
-requests==2.23.0
-six==1.15.0
-urllib3==1.25.9
+apache-libcloud==3.5.1
+certifi==2022.5.18.1
+charset-normalizer==2.0.12
+idna==3.3
+protobuf==3.20.1
+requests==2.27.1
+six==1.16.0
+urllib3==1.26.9
