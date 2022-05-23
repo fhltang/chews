@@ -59,7 +59,7 @@ Install chews:
 Now set up a convenience alias:
 
     CONFIG=configs/test.config
-    alias chews="docker run -it chews --config_file ${CONFIG} --project ${MY_PROJECT?}"
+    alias chews="docker run -it -v "${CONFIG}":/config/config.textproto:ro chews --project ${MY_PROJECT?}"
 
 This will build a `docker` image. To verify that this was successful, print the
 test config:

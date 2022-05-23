@@ -15,4 +15,4 @@ RUN make chews
 
 COPY . .
 
-ENTRYPOINT ["python", "./chews.py"]
+ENTRYPOINT ["python", "./chews.py", "--config_file", "/config/config.textproto"]
